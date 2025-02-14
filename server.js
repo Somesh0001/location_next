@@ -4,7 +4,7 @@ import http from "http";
 import mongoose from "mongoose";
 import Location from "./models/Location.js";
 
-const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/locationDB";
+const MONGODB_URI = "mongodb+srv://sd10072004:somesh123@cluster0.fpxvqqw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => console.error("❌ MongoDB Connection Error:", err));
@@ -17,6 +17,8 @@ io.on("connection", (socket) => {
   console.log(`✅ User Connected: ${socket.id}`);
 
   socket.on("join", async (data) => {
+    console.log("🔹 Received join event:", data);
+  
     try {
       const user = await Location.findOneAndUpdate(
         { socketId: socket.id },
@@ -27,7 +29,8 @@ io.on("connection", (socket) => {
         { upsert: true, new: true, runValidators: true }
       );
   
-      console.log("✅ User location saved:", user);
+      console.log("✅ User location saved in DB:", user);
+      
       const users = await Location.find();
       io.emit("users", users);
     } catch (error) {
